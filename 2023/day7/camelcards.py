@@ -18,6 +18,7 @@ AAAJJ: Best same = 5 of a kind; best different = 4 of a kind
 
 ABJJJ: Best same = 4 of a kind; best different (2 same) = full house; (0 same) = 2 pair
 AAJJJ: Best same = 5 of a kind (best hand)
+
 AJJJJ: Best same = 5 of a kind (best hand)
 
 JJJJJ: Obviously
