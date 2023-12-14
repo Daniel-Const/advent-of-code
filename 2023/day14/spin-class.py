@@ -1,3 +1,20 @@
+"""
+Cycle detection!
+
+When the board is in a state it was in previously, it will forever
+repeat all the states in between
+
+Find the length of the cycle and the # cycles remaining to get the load at
+cycle x
+
+|xxxx|
+     |xxxx|
+          |xxxx|
+|------------|
+|1234|1234|1234|
+             ^
+"""
+
 from copy import deepcopy
 from collections import Counter
 
@@ -13,35 +30,16 @@ def show(board, end="\n"):
         print(b)
     print(end)
 
-def move_north(board, row, col):
-    """
-    North: row - i - 1
-    East: col - i - 1
-    South: row + i + 1
-    West: col + i + 1
-    
-    """
-    i = 0
-    while row-i-1 >= 0 and board[row-i-1][col] == '.':
-        i += 1
-
-    if i > 0:
-        board[row-i][col] = 'O'
-        board[row][col] = '.'
-
 def move_rock(board, row, col, direction):
     i = 0
     r_inc, c_inc = direction
     r = row + (i * r_inc) + r_inc
     c = col + (i * c_inc) + c_inc
     while r >= 0 and c >= 0 and r < len(board) and c < len(board[0]) and board[r][c] == '.':
-        # print(r ,' vs ', row - i - 1)
         i += 1
         r = row + (i * r_inc) + r_inc
         c = col + (i * c_inc) + c_inc
-    
-    # print('Done; i = ', i, '\n', board[r - r_inc][c - c_inc])
-        
+            
     if i > 0:
         board[r - r_inc][c - c_inc] = 'O'
         board[row][col] = '.'
@@ -77,8 +75,6 @@ def stringify(board):
     return ''.join(''.join([ch for ch in row]) for row in board)    
 
 def get_first_cycle(board, start=0, iters=100):
-    # board_states = {}
-    # cycle_states = {}
     loads = []
     states = {}
     for i in range(iters):
@@ -89,40 +85,29 @@ def get_first_cycle(board, start=0, iters=100):
         key = stringify(board)
         if key in states:
             return loads, i
-        
-        
+
         total_load = sum(calculate_load(board))
+        print(i, total_load)
         if i > start:
             states[stringify(board)] = {'load': total_load, 'cycle': i}
             loads.append(total_load)
 
+    # No cycles
+    return None
+
 
 if __name__ == "__main__":
-    with open('in.txt') as f:
+    with open('ex.txt') as f:
         board = [[c for c in line if c != '\n'] for line in f.readlines()]
     
-    # show(board, end="\n\n")
     iters = 1000000000
+
+    # Offset (+ 1) gives us the start of a cycle
     _, offset = get_first_cycle(board, start=0, iters=iters)
-    loads, idx = get_first_cycle(board, start=offset, iters=iters)
-    # pattern_start = idx - offset - 1
-    print('first pattern ends: ', offset)
-    print('first pattern starts: ', offset - len(loads) + 1) # 'offset'
-    print(len(loads))
-    starts = offset - (len(loads))
+    
+    # Starting from offset, get all the loads in the cycle
+    loads, _ = get_first_cycle(board, start=offset, iters=iters)
 
-    # print(loads)
-    # print(offset, idx)
-    l = len(loads)
-    k = (l - (iters % l)) + (l % starts)
-    print(k)
-    """
-    offset+1 = start of pattern
-    idx - offset = len of pattern
-    """
-
-    # print(cycle_states)
-    # k = len(cycle_states) - ((iters - offset) % len(cycle_states))
-    # print(k+1)
+    # Index into the loads => (remaining cycles) % length of cycle
+    k = ((iters - offset - 1) % len(loads)) - 1
     print(loads[k])
-
